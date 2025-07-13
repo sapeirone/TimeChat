@@ -27,3 +27,13 @@ share/python-wheels/
 *.egg
 MANIFEST
 .idea
+
+# ignore original and processed clips
+ego4d_data
+ego4d_data_processed
+
+# ignore saved checkpoints
+ckpt
+
+# ignore ego4d instruction tuning annotations
+ego4d_it.json
