@@ -1,3 +1,6 @@
+import os
+import json
+
 from tqdm.auto import tqdm
 
 from ego4d.dataset.oscc import OSCCDataset
@@ -5,8 +8,6 @@ from ego4d.dataset.pnr import PNRDataset
 from ego4d.dataset.ar import ARDataset
 from ego4d.dataset.mq import MQDataset
 from ego4d.dataset.lta import LTADataset
-
-import os
 
 FPS = 30.0
 
@@ -61,11 +62,8 @@ if __name__ == "__main__":
         for sample in tqdm(dataset, total=len(dataset)):
             extract_video(sample, task, args.input_videos_path, args.output_videos_path, FPS)
 
-    # # #     for sample in dataset:
-    # # #         print(sample.generate_it_sample())
-    # # #         break
-
-    # # # # Save samples
-    # # # samples = [sample.generate_it_sample() for dataset in all_datasets.values() for sample in dataset]
-
-    # # # json.dump(samples, open("ego4d_it.json", "w"))
+    # Save samples
+    samples = [sample.generate_it_sample() for dataset in all_datasets.values() for sample in dataset]
+    for sample in samples:
+        sample['video'] = f"{sample['source'].replace('ego4d_', '')}/{sample['video']}"
+    json.dump(samples, open("ego4d_it.json", "w"))

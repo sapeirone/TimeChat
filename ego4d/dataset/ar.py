@@ -39,7 +39,7 @@ class Action:
         return {
             "video": f"{self.clip_uid}.mp4",
             "QA": [{"q": "Describe the action shown in the video with a (verb, noun) pair.", "a": f"({self.verb}, {self.noun})"}],
-            "source": "ego4d_oscc",
+            "source": "ego4d_ar",
         }
 
 
