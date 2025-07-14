@@ -66,4 +66,5 @@ if __name__ == "__main__":
     samples = [sample.generate_it_sample() for dataset in all_datasets.values() for sample in dataset]
     for sample in samples:
         sample['video'] = f"{sample['source'].replace('ego4d_', '')}/{sample['video']}"
+    print(f"There are {len(samples)} samples...")
     json.dump(samples, open("ego4d_it.json", "w"))
