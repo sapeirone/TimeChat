@@ -145,3 +145,4 @@ if __name__ == "__main__":
             continue
 
     print(f"Accuracy: {100 * correct / n:.4f} ({n} samples).")
+    print(f"Number of broken samples during evalution: {broken_samples}.")
