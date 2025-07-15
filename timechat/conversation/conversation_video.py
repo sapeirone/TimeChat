@@ -177,13 +177,11 @@ class Chat:
         #                   torch.tensor([2277, 29937]).to(self.device)]  # '###' can be encoded in two different ways.
         # self.stopping_criteria = StoppingCriteriaList([StoppingCriteriaSub(stops=stop_words_ids)])
 
-    def ask(self, text, conv):
-        if len(conv.messages) > 0 and conv.messages[-1][0] == conv.roles[0] \
-                and (
-                '</Video>' in conv.messages[-1][1] or '</Image>' in conv.messages[-1][1]):  # last message is image.
+    def ask(self, text, conv, role='USER'):
+        if len(conv.messages) > 0 and conv.messages[-1][0] == role:  # last message is image.
             conv.messages[-1][1] = ' '.join([conv.messages[-1][1], text])
         else:
-            conv.append_message(conv.roles[0], text)
+            conv.append_message(role, text)
 
     def answer(self, conv, img_list, max_new_tokens=300, num_beams=1, min_length=1, top_p=0.9,
                repetition_penalty=1.0, length_penalty=1, temperature=1.0, max_length=2000):
@@ -268,9 +266,12 @@ class Chat:
         if self.model.qformer_text_input:
             image_emb, _ = self.model.encode_videoQformer_visual(video, timestamp=timestamps)
         else:
-            image_emb, _ = self.model.encode_videoQformer_visual(video)
+            image_emb, _ = self.model.encode_videoQformer_visual(video)            
+
         img_list.append(image_emb)
-        conv.append_message(conv.roles[0], "<Video><ImageHere></Video> " + msg)
+        # conv.append_message(conv.roles[0], "<Video><ImageHere></Video> " + msg)
+        self.ask("\n\n<Video><ImageHere></Video> " + msg, conv, role=conv.roles[0])
+
         return "Received."
 
     def upload_img(self, image, conv, img_list):
@@ -298,6 +299,10 @@ class Chat:
 
     def get_context_emb(self, conv, img_list):
         prompt = conv.get_prompt()
+        # print(prompt)
+        # breakpoint()
+        #prompt = """[INST] <<SYS>>\nYou are able to understand the visual content that the user provides. Follow the instructions carefully and explain your answers in detail.\n<</SYS>>You are asked to determine whether a video contains an object state change. This could be, for example, an apple being sliced or a glass being filled. If there is a visible transformation in the object's physical state, answer 'Object state changed'. Otherwise, answer 'Object state not changed'.  Look at the following examples: \n\n<Video><ImageHere></Video> The video contains 8 frames sampled at 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5 seconds.  Is there an object state change? Object state not changed  \n\n<Video><ImageHere></Video> The video contains 8 frames sampled at 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5 seconds.  Is there an object state change? Object state changed.  \n\n<Video><ImageHere></Video> The video contains 8 frames sampled at 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5 seconds.  Is there an object state change? Object state not changed  \n\n<Video><ImageHere></Video> The video contains 8 frames sampled at 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5 seconds.  Is there an object state change? Object state changed.  \n\n<Video><ImageHere></Video> The video contains 8 frames sampled at 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5 seconds.  Is there an object state change? Object state not changed  \n\n<Video><ImageHere></Video> The video contains 8 frames sampled at 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5 seconds.  Is there an object state change? Object state changed. \n\n<Video><ImageHere></Video> The video contains 8 frames sampled at 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5 seconds.  Is there an object state change?  [/INST]"""
+        # prompt = """[INST] <<SYS>>\nYou are able to understand the visual content that the user provides. Follow the instructions carefully and explain your answers in detail.\n<</SYS>>You are asked to determine whether a video contains an object state change. This could be, for example, an apple being sliced or a glass being filled. \n\n<Video><ImageHere></Video> The video contains 16 frames sampled at 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5 seconds.  Tell if the video contains an object state change and answer 'Object state changed' or 'Object state not changed'.  [/INST]"""
         prompt_segs = prompt.split('<ImageHere>')
         assert len(prompt_segs) == len(img_list) + 1, "Unmatched numbers of image placeholders and images."
         seg_tokens = [
