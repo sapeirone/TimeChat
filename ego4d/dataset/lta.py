@@ -21,13 +21,18 @@ logger.setLevel(logging.DEBUG)
 class LTASegment:
     """LTA Sample."""
 
-    def __init__(self, video_uid: str, clip_uid: str, video_start_frame: int, video_end_frame: int, verb_labels: List[int], noun_labels: List[int]):
+    def __init__(self, video_uid: str, clip_uid: str, video_start_frame: int, video_end_frame: int, 
+                 input_verb_labels: List[str], input_noun_labels: List[str],
+                 verb_labels: List[str], noun_labels: List[str]):
 
         self.video_uid: str = video_uid
         self.clip_uid: str = clip_uid
 
         self.video_start_frame: int = video_start_frame
         self.video_end_frame: int = video_end_frame
+
+        self.input_verb_labels = input_verb_labels
+        self.input_noun_labels = input_noun_labels
 
         self.verb_labels: List[int] = verb_labels
         self.noun_labels: List[int] = noun_labels
@@ -144,10 +149,15 @@ class LTADataset(Dataset):
 
                 verb_labels = [action.verb_labels for action in forecast_clips]
                 noun_labels = [action.noun_labels for action in forecast_clips]
+                
+                input_verb_labels = [action.verb_labels for action in input_clips]
+                input_noun_labels = [action.noun_labels for action in input_clips]
 
                 clip_uid = f"{clip.clip_uid}_{input_clips[-1].idx}"
 
-                segment = LTASegment(clip.video_uid, clip_uid, input_clips[0].video_start_frame, input_clips[-1].video_end_frame, verb_labels, noun_labels)  # type: ignore
+                segment = LTASegment(clip.video_uid, clip_uid, input_clips[0].video_start_frame, input_clips[-1].video_end_frame, 
+                                     input_verb_labels=input_verb_labels, input_noun_labels=input_noun_labels, 
+                                     verb_labels=verb_labels, noun_labels=noun_labels)  # type: ignore
 
                 segments.append(segment)
 
@@ -162,3 +172,9 @@ class LTADataset(Dataset):
 
     def __getitem__(self, idx: int):
         return self.samples[idx]
+
+
+if __name__ == "__main__":
+    dset = LTADataset("train")
+    breakpoint()
+    pass

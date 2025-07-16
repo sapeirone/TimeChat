@@ -1,7 +1,7 @@
 # ICL using TimeChat for Object State Change Classification (OSCC) on Ego4D dataset
 
 import os.path as osp
-from random import sample
+import random
 import warnings
 
 from tqdm.auto import tqdm
@@ -42,8 +42,8 @@ def ask(video_uid: str, positive_clips, negative_clips, timechat_model, vis_proc
         # Prompt the model with positive and negative examples
         chat.ask(EXAMPLES_PROMPT, state)
 
-        positive_prompts = sample(positive_clips, min(n_icl, len(positive_clips)))
-        negative_prompts = sample(negative_clips, min(n_icl, len(negative_clips)))
+        positive_prompts = random.sample(positive_clips, min(n_icl, len(positive_clips)))
+        negative_prompts = random.sample(negative_clips, min(n_icl, len(negative_clips)))
         for pos, neg in zip(positive_prompts, negative_prompts):
 
             try:
@@ -110,10 +110,11 @@ if __name__ == "__main__":
     correct, n = 0, 0
     # And the number of yes/no predictions
     n_yes, n_no = 0, 0
+    
+    # Keep track of the number of samples for which it was not possible to compute the metric
+    broken_samples = 0
 
-    samples = list(dset_val)
-
-    pbar = tqdm(samples, total=len(samples), desc="Processing videos...")
+    pbar = tqdm(dset_val, total=len(dset_val), desc="Processing videos...")
     for sample in pbar:
 
         try:
@@ -127,6 +128,8 @@ if __name__ == "__main__":
                 n_icl=args.icl_examples,
                 data_path=args.video_path,
             )
+
+            print(response)
 
             # Parse the response in a quite permissive way
             response = response.strip().lower()

@@ -102,11 +102,10 @@ if __name__ == "__main__":
     # Collect here the absolute temporal localization errors
     errors = []
 
-    # Keep track of the number of samples for which it was not possible to
-    # compute the metric
+    # Keep track of the number of samples for which it was not possible to compute the metric
     broken_samples = 0
 
-    pbar = tqdm(list(dset_val), total=len(dset_val), desc="Processing PNR videos...")
+    pbar = tqdm(dset_val, total=len(dset_val), desc="Processing PNR videos...")
     for sample in pbar:
 
         try:
