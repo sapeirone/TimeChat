@@ -36,8 +36,8 @@ EXAMPLES_PROMPT = "Look at the following examples: "
 PROMPT = "The most likely 20 future actions are: "
 
 
-def ask(sample, timechat_model, timechat_vis_processor, verbs_list, nouns_list, num_frames=8, n_icl: int = 0, icl_clips=[], data_path: str = "ego4d_hoi_trimmed_videos/ar"):
-    """Ask the TimeChat model about AR samples and return the raw unparsed response of the llm."""
+def ask(sample, timechat_model, timechat_vis_processor, verbs_list, nouns_list, num_frames=8, n_icl: int = 0, icl_clips=[], data_path: str = "ego4d_hoi_trimmed_videos/lta"):
+    """Ask the TimeChat model about LTA samples and return the raw unparsed response of the llm."""
     chat = Chat(timechat_model, timechat_vis_processor, device="cuda")
 
     frames = []
@@ -83,11 +83,11 @@ def eval_ed(preds, labels):
 if __name__ == "__main__":
     # Example usage
 
-    args = argparse.ArgumentParser(description="Ego4D AR ICL Demo")
+    args = argparse.ArgumentParser(description="Ego4D LTA ICL Demo")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--icl-examples", type=int, default=0, help="Number of in-context learning examples to use (0 means no ICL samples).")
-    args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/ar", help="Processed video path to use for the Ego4D dataset.")
+    args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/lta", help="Processed video path to use for the Ego4D dataset.")
 
     args = args.parse_args()
 

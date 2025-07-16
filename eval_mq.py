@@ -63,7 +63,7 @@ def eval_ed(preds, labels):
 if __name__ == "__main__":
     # Example usage
 
-    args = argparse.ArgumentParser(description="Ego4D AR ICL Demo")
+    args = argparse.ArgumentParser(description="Ego4D MQ ICL Demo")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/ar", help="Processed video path to use for the Ego4D dataset.")

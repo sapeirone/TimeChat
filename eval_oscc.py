@@ -129,8 +129,6 @@ if __name__ == "__main__":
                 data_path=args.video_path,
             )
 
-            print(response)
-
             # Parse the response in a quite permissive way
             response = response.strip().lower()
             response_is_positive = any(term in response.lower() for term in ["yes", "object state changed"])
