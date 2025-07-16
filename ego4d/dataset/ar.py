@@ -45,7 +45,7 @@ class Action:
 
 class ARDataset(Dataset):
 
-    def __init__(self, split: Literal["train", "val"], num_verbs: int = 115, num_nouns: int = 478, root: str = "../../data/ego4d/raw/annotations/v1/"):
+    def __init__(self, split: Literal["train", "val"], num_verbs: int = 115, num_nouns: int = 478, root: str = "ego4d/annotations/v1/"):
         # Initialize the dataset
         super().__init__()
 
@@ -65,7 +65,7 @@ class ARDataset(Dataset):
         self.samples: List[Action] = self._load_annotations(ann_root=root)
 
     def _load_fho_taxonomy(self) -> Tuple[List[str], List[str]]:
-        path = osp.join("../../data/ego4d/raw/annotations/v1/fho_lta_taxonomy.json")
+        path = osp.join("ego4d/annotations/v1/fho_lta_taxonomy.json")
 
         if not osp.exists(path):
             raise FileNotFoundError(f"Could not find the FHO taxonomy at {path}")

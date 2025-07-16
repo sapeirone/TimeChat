@@ -65,7 +65,7 @@ class Sample:
 class OSCCDataset(Dataset):
     """OSCC dataset for the Ego4D dataset."""
 
-    def __init__(self, split: Literal["train", "val"], root: str = "../../data/ego4d/raw/annotations/v1/"):
+    def __init__(self, split: Literal["train", "val"], root: str = "ego4d/annotations/v1/"):
         # Initialize the dataset
         super().__init__()
 

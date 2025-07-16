@@ -74,7 +74,7 @@ class Sample:
 
 class MQDataset(Dataset):
 
-    def __init__(self, split: Literal["train", "val"], root: str = "../../data/ego4d/raw/annotations/v1/"):
+    def __init__(self, split: Literal["train", "val"], root: str = "ego4d/annotations/v1/"):
         # Initialize the dataset
 
         self.split = split
