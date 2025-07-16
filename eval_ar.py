@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     # Action Recognition dataset
     print("Loading AR dataset...")
-    dset_train = ARDataset(split="val")
+    dset_train = ARDataset(split="train")
     dset_val = ARDataset(split="val")
 
     print(f"Loaded {len(dset_val)} validation samples.")
