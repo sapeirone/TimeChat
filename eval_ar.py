@@ -135,5 +135,5 @@ if __name__ == "__main__":
 
     verbs_acc = 100 * sum(verbs_correct) / len(verbs_correct)
     nouns_acc = 100 * sum(nouns_correct) / len(nouns_correct)
-    pbar.set_description(f"Verbs acc: {verbs_acc:.2f}, Nouns acc: {nouns_acc:.2f}.")
+    print(f"Verbs acc: {verbs_acc:.2f}, Nouns acc: {nouns_acc:.2f}.")
     print(f"Number of broken samples during evalution: {broken_samples}.")

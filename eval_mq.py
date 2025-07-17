@@ -146,5 +146,5 @@ if __name__ == "__main__":
             print("Error processing video %s: %s", video.clip_uid, e)
             continue
 
-    print(f"R@1 (IoU=0.1): {100 * r1_01 / len(avg_tiou):.2f}), R@1 (IoU=0.5): {100 * r1_05 / len(avg_tiou):.2f}")
+    print(f"R@1 (IoU=0.1): {100 * r1_01 / len(avg_tiou):.2f}, R@1 (IoU=0.5): {100 * r1_05 / len(avg_tiou):.2f}")
     print(f"Number of broken samples during evalution: {broken_samples}.")

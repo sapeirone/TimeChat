@@ -181,5 +181,5 @@ if __name__ == "__main__":
             print("Error processing video %s: %s", sample.clip_uid, e)
             continue
 
-    print(f"Verbs ed: {mean(verbs_ed):.2f}, Nouns acc: {mean(nouns_ed):.2f}.")
+    print(f"Verbs ed: {mean(verbs_ed):.3f}, Nouns ed: {mean(nouns_ed):.3f}.")
     print(f"Number of broken samples during evalution: {broken_samples}.")
