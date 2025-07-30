@@ -55,7 +55,7 @@ class ARDataset(Dataset):
         self.num_nouns = num_nouns
 
         # Load the verbs and nouns taxonomy
-        self.verb_labels, self.noun_labels = self._load_fho_taxonomy()
+        self.verb_labels, self.noun_labels = self._load_fho_taxonomy(ann_root=root)
         self.verb_labels = [l if "_" not in l else l.split("_")[0] for l in self.verb_labels]
         self.noun_labels = [l if "_" not in l else l.split("_")[0] for l in self.noun_labels]
 
@@ -64,8 +64,8 @@ class ARDataset(Dataset):
 
         self.samples: List[Action] = self._load_annotations(ann_root=root)
 
-    def _load_fho_taxonomy(self) -> Tuple[List[str], List[str]]:
-        path = osp.join("../../data/ego4d/raw/annotations/v1/fho_lta_taxonomy.json")
+    def _load_fho_taxonomy(self, ann_root) -> Tuple[List[str], List[str]]:
+        path = osp.join(ann_root, "fho_lta_taxonomy.json")
 
         if not osp.exists(path):
             raise FileNotFoundError(f"Could not find the FHO taxonomy at {path}")
