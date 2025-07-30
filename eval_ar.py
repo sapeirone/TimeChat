@@ -58,7 +58,7 @@ def ask(video_uid, timechat_model, timechat_vis_processor, verbs_list, nouns_lis
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
     chat.ask(PROMPT, state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=3000)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=4096, max_new_tokens=256)[0]
 
 
 if __name__ == "__main__":
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
+    model, vis_processor = build_model(ckpt=args.timechat_ckpt, long_context=True)
 
     # Action Recognition dataset
     print("Loading AR dataset...")

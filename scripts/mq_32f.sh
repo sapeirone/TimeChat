@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=timechat_ar_ZS                      # Job name
+#SBATCH --job-name=timechat_mq_ZS_32f                      # Job name
 #SBATCH --output=logs/timechat/3007/%x_%j.out            # Output log (%x=job-name, %j=job-id)
 #SBATCH --error=logs/timechat/3007/%x_%j.err             # Error log
 #SBATCH --ntasks=1                                  # Number of tasks
@@ -11,5 +11,5 @@
 
 conda activate timechat
 
-echo "Running with 8 frames..."
-python -m eval_ar --icl-examples 0 --num-frames 8 --video-path /beegfs-scratch/speirone/ego4d_videos/ar --ann-path ego4d/annotations/v1/
+echo "Running with 32 frames..."
+python -m eval_mq --num-frames 32 --video-path /beegfs-scratch/speirone/ego4d_videos/mq --ann-path ego4d/annotations/v1/

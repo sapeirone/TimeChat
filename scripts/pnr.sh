@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=timechat_pnr                     # Job name
-#SBATCH --output=logs/timechat/%x_%j.out            # Output log (%x=job-name, %j=job-id)
-#SBATCH --error=logs/timechat/%x_%j.err             # Error log
+#SBATCH --job-name=timechat_pnr_ZS                     # Job name
+#SBATCH --output=logs/timechat/3007/%x_%j.out            # Output log (%x=job-name, %j=job-id)
+#SBATCH --error=logs/timechat/3007/%x_%j.err             # Error log
 #SBATCH --ntasks=1                                  # Number of tasks
 #SBATCH --cpus-per-task=24                          # Number of CPU cores per task
 #SBATCH --mem=32G                                   # Total memory
@@ -11,13 +11,6 @@
 
 conda activate timechat
 
-# Run the script
-
 echo "Running with 8 frames and 0 icl examples..."
-python -m eval_pnr --icl-examples 0 --num-frames 8
+python -m eval_pnr --icl-examples 0 --num-frames 8 --video-path /beegfs-scratch/speirone/ego4d_videos/oscc --ann-path ego4d/annotations/v1/
 
-echo "Running with 16 frames and 0 icl examples..."
-python -m eval_pnr --icl-examples 0 --num-frames 16
-
-echo "Running with 32 frames and 0 icl examples..."
-python -m eval_pnr --icl-examples 0 --num-frames 32

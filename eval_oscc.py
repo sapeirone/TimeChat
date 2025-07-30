@@ -70,7 +70,7 @@ def ask(video_uid: str, positive_clips, negative_clips, timechat_model, vis_proc
     chat.ask(PROMPT, state, role="USER")
 
     # Return the response of the LLM
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=3000)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=2048, max_new_tokens=256)[0]
 
 
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ def ask(video_uid, query, timechat_model, timechat_vis_processor, activities_lis
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
     chat.ask(PROMPT.format(query), state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=3000)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=2048, max_new_tokens=256)[0]
 
 
 def eval_ed(preds, labels):

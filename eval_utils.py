@@ -45,9 +45,14 @@ def parse_args():
     return args
 
 
-def build_model(ckpt="ckpt/timechat/timechat_7b.pth"):
+def build_model(ckpt="ckpt/timechat/timechat_7b.pth", long_context=False):
     print("Initializing Chat")
     args = parse_args()
+
+    if long_context:
+        print("Using long context configuration.")
+        args.cfg_path = "eval_configs/timechat_long_context.yaml"
+
     cfg = Config(args)
 
     assert osp.exists(ckpt), f"Model checkpoint {ckpt} does not exist."

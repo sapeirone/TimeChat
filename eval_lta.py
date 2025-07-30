@@ -64,7 +64,7 @@ def ask(sample, timechat_model, timechat_vis_processor, verbs_list, nouns_list, 
     #chat.ask(PROMPT + "[" + ",".join(f"({verb}, {noun})" for verb, noun in zip(sample.input_verb_labels, sample.input_noun_labels)) + "] => ", state, role="USER")
     chat.ask(PROMPT, state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=0.5, max_length=3000)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=0.5, max_length=4096, max_new_tokens=512)[0]
 
 
 def eval_ed(preds, labels):
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
+    model, vis_processor = build_model(ckpt=args.timechat_ckpt, long_context=True)
 
     # Action Recognition dataset
     print("Loading AR dataset...")
