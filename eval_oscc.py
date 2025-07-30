@@ -139,7 +139,7 @@ if __name__ == "__main__":
             n_yes += response_is_positive
             n_no += not response_is_positive
 
-            pbar.set_description(f"Processing videos... (Acc.: {correct / n:.2f} (n_yes={n_yes}, n_no={n_no}).")
+            pbar.set_description(f"Processing videos... (Acc.: {100 * correct / n:.2f} (n_yes={n_yes}, n_no={n_no}).")
 
         except Exception as e:  # pylint: disable=broad-except
             broken_samples += 1

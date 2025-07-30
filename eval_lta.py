@@ -175,7 +175,7 @@ if __name__ == "__main__":
             verbs_ed.append(eval_ed(verbs, verbs_gt).item())
             nouns_ed.append(eval_ed(nouns, nouns_gt).item())
 
-            pbar.set_description(f"Verbs ed: {mean(verbs_ed):.2f}, Nouns acc: {mean(nouns_ed):.2f}.")
+            pbar.set_description(f"Verbs ed: {mean(verbs_ed):.3f}, Nouns acc: {mean(nouns_ed):.3f}.")
 
         except Exception as e:  # pylint: disable=broad-except
             broken_samples += 1

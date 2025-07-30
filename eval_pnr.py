@@ -128,12 +128,12 @@ if __name__ == "__main__":
             gt_rel_timestamp = (sample.video_pnr_frame - sample.video_start_frame) / 30.0
             errors.append(abs(gt_rel_timestamp - response))
 
-            pbar.set_description(f"Processing PNR samples... (Err.: {mean(errors):.2f}).")
+            pbar.set_description(f"Processing PNR samples... (Err.: {mean(errors):.4f}).")
 
         except Exception as e:  # pylint: disable=broad-except
             broken_samples += 1
             print("Error processing video %s: %s", sample.clip_uid, e)
             continue
 
-    print(f"Avg. localization error: {mean(errors):.2f}")
+    print(f"Avg. localization error: {mean(errors):.4f}")
     print(f"Number of broken samples during evalution: {broken_samples}.")
