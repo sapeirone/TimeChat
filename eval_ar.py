@@ -65,6 +65,7 @@ if __name__ == "__main__":
     # Example usage
 
     args = argparse.ArgumentParser(description="Ego4D AR ICL Demo")
+    args.add_argument("--ann-path", type=str, default="ego4d/annotations/v1/")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--icl-examples", type=int, default=0, help="Number of in-context learning examples to use (0 means no ICL samples).")
@@ -85,8 +86,8 @@ if __name__ == "__main__":
 
     # Action Recognition dataset
     print("Loading AR dataset...")
-    dset_train = ARDataset(split="train")
-    dset_val = ARDataset(split="val")
+    dset_train = ARDataset(split="train", root=args.ann_path)
+    dset_val = ARDataset(split="val", root=args.ann_path)
 
     print(f"Loaded {len(dset_val)} validation samples.")
 

@@ -74,6 +74,7 @@ def ask(video_uid: str, positive_clips, timechat_model, vis_processor, n_frames:
 if __name__ == "__main__":
 
     args = argparse.ArgumentParser(description="Ego4D PNR ICL Eval")
+    args.add_argument("--ann-path", type=str, default="ego4d/annotations/v1/")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--icl-examples", type=int, default=0, help="Number of in-context learning examples to use (0 means no ICL samples).")
@@ -94,8 +95,8 @@ if __name__ == "__main__":
 
     # Build the PNR dataset
     print("Loading PNR dataset...")
-    dset_train = PNRDataset(split="train")
-    dset_val = PNRDataset(split="val")
+    dset_train = PNRDataset(split="train", root=args.ann_path)
+    dset_val = PNRDataset(split="val", root=args.ann_path)
 
     print(f"Loaded {len(dset_train)} training samples and {len(dset_val)} validation samples.")
 

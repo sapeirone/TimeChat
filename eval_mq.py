@@ -64,6 +64,7 @@ if __name__ == "__main__":
     # Example usage
 
     args = argparse.ArgumentParser(description="Ego4D MQ ICL Demo")
+    args.add_argument("--ann-path", type=str, default="ego4d/annotations/v1/")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/mq", help="Processed video path to use for the Ego4D dataset.")
@@ -83,8 +84,8 @@ if __name__ == "__main__":
 
     # Action Recognition dataset
     print("Loading MQ dataset...")
-    dset_train = MQDataset(split="train")
-    dset_val = MQDataset(split="val")
+    dset_train = MQDataset(split="train", root=args.ann_path)
+    dset_val = MQDataset(split="val", root=args.ann_path)
 
     print(f"Loaded {len(dset_val)} validation samples.")
 
