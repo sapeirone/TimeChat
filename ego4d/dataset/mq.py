@@ -57,24 +57,27 @@ class Sample:
         """Generate instruction tuning sample"""
 
         segments = [((s.video_start_frame - self.video_start_frame) / 30.0, (s.video_end_frame - self.video_start_frame) / 30.0, s.label) for s in self.segments]
+        unique_labels = list(set(s.label for s in self.segments))
 
-        segments_str = " ".join(f"{ss:.1f} - {es:.1f} seconds, {label}." for ss, es, label in segments)
-
-        return {
-            "video": f"{self.clip_uid}.mp4",
-            "QA": [
-                {
-                    "q": "List all the activities appearing in the given video. For each activity, output the start timestamp, the end timestamp and the label with the following format.",
-                    "a": segments_str,
-                }
-            ],
-            "source": "ego4d_mq",
-        }
+        return [
+            {
+                "video": f"mq/{self.clip_uid}.mp4",
+                "length": (self.video_end_frame - self.video_start_frame) / 30.0,
+                "QA": [
+                    {
+                        "q": f"Find all the segments that corresponds to the textual query '{unique_label}' and determine their start and end seconds.",
+                        "a": " ".join(f"{ss:.1f} - {es:.1f} seconds." for ss, es, label in segments if label == unique_label),
+                    }
+                ],
+                "source": "ego4d_mq",
+            }
+            for unique_label in unique_labels
+        ]
 
 
 class MQDataset(Dataset):
 
-    def __init__(self, split: Literal["train", "val"], root: str = "ego4d/annotations/v1/"):
+    def __init__(self, split: Literal["train", "val"], root: str = "../../data/ego4d/raw/annotations/v1/"):
         # Initialize the dataset
 
         self.split = split

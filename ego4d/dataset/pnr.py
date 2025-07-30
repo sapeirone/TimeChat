@@ -54,20 +54,20 @@ class Sample:
         """Generate instruction tuning sample"""
         rel_timestamp = (self.video_pnr_frame - self.video_start_frame) / 30.0
 
-        return {
-            "video": f"{self.clip_uid}.mp4",
+        return [{
+            "video": f"oscc/{self.clip_uid}.mp4",
             "QA": [{
                 "q": "Predict the timestamp in seconds of the object state change in the given video.", 
                 "a": f"The state change happens at {rel_timestamp:.1f} seconds."
             }],
             "source": "ego4d_pnr",
-        }
+        }]
 
 
 class PNRDataset(Dataset):
     """OSCC dataset for the Ego4D dataset."""
 
-    def __init__(self, split: Literal["train", "val"], root: str = "ego4d/annotations/v1/"):
+    def __init__(self, split: Literal["train", "val"], root: str = "../../data/ego4d/raw/annotations/v1/"):
         # Initialize the dataset
         super().__init__()
 

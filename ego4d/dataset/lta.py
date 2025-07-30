@@ -46,8 +46,8 @@ class LTASegment:
 
     def generate_it_sample(self):
         """Generate instruction tuning sample"""
-        return {
-            "video": f"{self.clip_uid}.mp4",
+        return [{
+            "video": f"lta/{self.clip_uid}.mp4",
             "QA": [
                 {
                     "q": "Given a short video segment predict the future action as (verb, noun) pairs based on the provided context.",
@@ -55,7 +55,7 @@ class LTASegment:
                 }
             ],
             "source": "ego4d_lta",
-        }
+        }]
 
 
 @dataclass
@@ -84,7 +84,7 @@ class Clip:
 class LTADataset(Dataset):
     """LTA dataset for the Ego4d dataset."""
 
-    def __init__(self, split: Literal["train", "val"], num_input_clips: int = 2, Z: int = 20, root: str = "ego4d/annotations/v1/"):
+    def __init__(self, split: Literal["train", "val"], num_input_clips: int = 2, Z: int = 20, root: str = "../../data/ego4d/raw/annotations/v1/"):
         # Initialize the dataset
         super().__init__()
 

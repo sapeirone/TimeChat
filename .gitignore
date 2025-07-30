@@ -37,3 +37,12 @@ ckpt
 
 # ignore ego4d instruction tuning annotations
 ego4d_it.json
+
+tmp
+logs
+old
+
+ego4d/annotations
+ego4d_hoi_trimmed_videos*
+wandb
+*.json

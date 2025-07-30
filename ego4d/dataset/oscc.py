@@ -52,20 +52,20 @@ class Sample:
 
     def generate_it_sample(self):
         """Generate instruction tuning sample"""
-        return {
-            "video": f"{self.clip_uid}.mp4",
+        return [{
+            "video": f"oscc/{self.clip_uid}.mp4",
             "QA": [{
                 "q": "Tell if the given video contains an object state change and output either 'yes' or 'no'.", 
                 "a": "yes" if self.label else "no"
             }],
             "source": "ego4d_oscc",
-        }
+        }]
 
 
 class OSCCDataset(Dataset):
     """OSCC dataset for the Ego4D dataset."""
 
-    def __init__(self, split: Literal["train", "val"], root: str = "ego4d/annotations/v1/"):
+    def __init__(self, split: Literal["train", "val"], root: str = "../../data/ego4d/raw/annotations/v1/"):
         # Initialize the dataset
         super().__init__()
 
