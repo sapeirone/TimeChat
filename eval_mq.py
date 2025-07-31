@@ -16,6 +16,8 @@ from eval_utils import build_model
 from ego4d.dataset.mq import MQDataset
 from timechat.conversation.conversation_video import Chat, conv_llava_llama_2
 
+import random
+
 nlp = spacy.load("en_core_web_sm")
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -25,10 +27,12 @@ SYSTEM_PROMPT = "You are able to understand the visual content that the user pro
 
 TASK_DESCRIPTION = "You are given a video containing several human activities. "
 
+EXAMPLES_PROMPT = "Look at the following examples: "
+
 PROMPT = "Find all the video segments that corresponds to the given textual query '{}' and determine their start and end seconds. If the action appears more than once, return all the occurrences."
 
 
-def ask(video_uid, query, timechat_model, timechat_vis_processor, activities_list, num_frames=8, data_path: str = "ego4d_hoi_trimmed_videos/ar"):
+def ask(video_uid, query, timechat_model, timechat_vis_processor, activities_list, num_frames=8, n_icl: int = 0, icl_clips=[], data_path: str = "ego4d_hoi_trimmed_videos/ar"):
     """Ask the TimeChat model about MQ samples and return the raw unparsed response of the llm."""
     chat = Chat(timechat_model, timechat_vis_processor, device="cuda")
 
@@ -38,13 +42,29 @@ def ask(video_uid, query, timechat_model, timechat_vis_processor, activities_lis
 
     # Description of the task
     chat.ask(TASK_DESCRIPTION.format(activities_list), state)
+    
+    if n_icl > 0:
+        chat.ask(EXAMPLES_PROMPT, state)
+
+        for icl_sample in random.sample(icl_clips, min(n_icl, len(icl_clips))):
+            path = osp.join(data_path, icl_sample.clip_uid + ".mp4")
+            chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
+
+            for segment in icl_sample.segments:
+                ssf, sef = segment.video_start_frame, segment.video_end_frame
+                label = segment.label.replace("_/_", "_or_").replace("_", " ")
+
+                nst, net = (ssf - icl_sample.video_start_frame) / 30.0, (sef - icl_sample.video_start_frame) / 30.0
+                
+                chat.ask(PROMPT.format(label), state, role="USER")
+                chat.ask(f"{nst:.1f} - {net:.1f} seconds.", state, role="USER")
 
     # Feed the sample and ask the question
     path = osp.join(data_path, video_uid + ".mp4")
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
     chat.ask(PROMPT.format(query), state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=2048, max_new_tokens=256)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=(2048 if n_icl == 0 else 4096), max_new_tokens=256)[0]
 
 
 def eval_ed(preds, labels):
@@ -67,6 +87,7 @@ if __name__ == "__main__":
     args.add_argument("--ann-path", type=str, default="ego4d/annotations/v1/")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
+    args.add_argument("--icl-examples", type=int, default=0, help="Number of in-context learning examples to use (0 means no ICL samples).")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/mq", help="Processed video path to use for the Ego4D dataset.")
 
     args = args.parse_args()
@@ -80,7 +101,7 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
+    model, vis_processor = build_model(ckpt=args.timechat_ckpt, long_context=(args.icl_examples > 0))
 
     # Action Recognition dataset
     print("Loading MQ dataset...")
@@ -115,6 +136,8 @@ if __name__ == "__main__":
                     num_frames=args.num_frames,
                     activities_list=dset_val.class_labels,
                     data_path=args.video_path,
+                    n_icl=args.icl_examples,
+                    icl_clips=list(dset_train),
                 )
 
                 best_iou = 0.0
