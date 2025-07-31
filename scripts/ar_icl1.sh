@@ -9,6 +9,8 @@
 #SBATCH --time=24:00:00                             # Time limit (hh:mm:ss)
 #SBATCH --partition=fair_gpu                        
 
+source ~/.bashrc
+conda init
 conda activate timechat
 
 echo "Running with 8 frames and 1 icl examples..."
