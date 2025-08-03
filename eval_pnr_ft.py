@@ -47,6 +47,7 @@ def ask(video_uid: str, timechat_model, vis_processor, n_frames: int = 8, data_p
 if __name__ == "__main__":
 
     args = argparse.ArgumentParser(description="Ego4D PNR ICL Eval")
+    args.add_argument("--ann-path", type=str, default="ego4d/annotations/v1/")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/oscc", help="Path to the Ego4d videos.")
@@ -66,7 +67,7 @@ if __name__ == "__main__":
 
     # Build the PNR dataset
     print("Loading PNR dataset...")
-    dset_val = PNRDataset(split="val")
+    dset_val = PNRDataset(split="val", root=args.ann_path)
 
     print(f"Loaded {len(dset_val)} validation samples.")
 
@@ -98,12 +99,12 @@ if __name__ == "__main__":
             gt_rel_timestamp = (sample.video_pnr_frame - sample.video_start_frame) / 30.0
             errors.append(abs(gt_rel_timestamp - response))
 
-            pbar.set_description(f"Processing PNR samples... (Err.: {mean(errors):.2f}).")
+            pbar.set_description(f"Processing PNR samples... (Err.: {mean(errors):.4f}).")
 
         except Exception as e:  # pylint: disable=broad-except
             broken_samples += 1
             print("Error processing video %s: %s", sample.clip_uid, e)
             continue
 
-    print(f"Avg. localization error: {mean(errors):.2f}")
+    print(f"Avg. localization error: {mean(errors):.4f}")
     print(f"Number of broken samples during evalution: {broken_samples}.")

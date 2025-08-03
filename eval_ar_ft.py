@@ -42,6 +42,7 @@ if __name__ == "__main__":
     # Example usage
 
     args = argparse.ArgumentParser(description="Ego4D AR ICL Demo")
+    args.add_argument("--ann-path", type=str, default="ego4d/annotations/v1/")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/ar", help="Processed video path to use for the Ego4D dataset.")
@@ -57,11 +58,11 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
+    model, vis_processor = build_model(ckpt=args.timechat_ckpt, long_context=True)
 
     # Action Recognition dataset
     print("Loading AR dataset...")
-    dset_val = ARDataset(split="val")
+    dset_val = ARDataset(split="val", root=args.ann_path)
 
     print(f"Loaded {len(dset_val)} validation samples.")
 
@@ -70,7 +71,7 @@ if __name__ == "__main__":
 
     # Keep track of the number of samples for which it was not possible to compute the metric
     broken_samples = 0
-
+    
     samples = list(dset_val)
 
     pbar = tqdm(samples, total=len(samples), desc="Processing AR videos...")
@@ -93,7 +94,7 @@ if __name__ == "__main__":
                     verb = token.lemma_
                 if token.pos_ == "NOUN" and noun is None and token.text in dset_val.noun_labels:
                     noun = token.text
-
+                    
             verbs_correct.append(verb is not None and verb.lower() == sample.verb)
             nouns_correct.append(noun is not None and noun.lower() == sample.noun)
 

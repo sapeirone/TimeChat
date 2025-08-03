@@ -43,6 +43,7 @@ if __name__ == "__main__":
     import argparse
 
     args = argparse.ArgumentParser(description="Ego4D OSCC FT Eval")
+    args.add_argument("--ann-path", type=str, default="ego4d/annotations/v1/")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/oscc", help="Processed video path to use for the Ego4D dataset.")
@@ -62,10 +63,9 @@ if __name__ == "__main__":
 
     # Object State Change Classification (OSCC) dataset
     print("Loading OSCC dataset...")
-    dset_train = OSCCDataset(split="train")
-    dset_val = OSCCDataset(split="val")
+    dset_val = OSCCDataset(split="val", root=args.ann_path)
 
-    print(f"Loaded {len(dset_train)} training samples and {len(dset_val)} validation samples.")
+    print(f"Loaded {len(dset_val)} validation samples.")
 
     # Collect here the number of correct predictions
     correct, n = 0, 0

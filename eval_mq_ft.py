@@ -10,6 +10,8 @@ from tqdm.auto import tqdm
 import numpy as np
 import spacy
 
+import editdistance
+
 from eval_utils import build_model
 from ego4d.dataset.mq import MQDataset
 from timechat.conversation.conversation_video import Chat, conv_llava_llama_2
@@ -21,7 +23,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 SYSTEM_PROMPT = "You are able to understand the visual content that the user provides. Follow the instructions carefully and explain your answers in detail."
 
-PROMPT = "List all the activities appearing in the given video. For each activity, output the start timestamp, the end timestamp and the label with the following format."
+PROMPT = "Find all the segments that corresponds to the textual query '{}' and determine their start and end seconds."
 
 
 def ask(video_uid, query, timechat_model, timechat_vis_processor, num_frames=8, data_path: str = "ego4d_hoi_trimmed_videos/ar"):
@@ -37,13 +39,27 @@ def ask(video_uid, query, timechat_model, timechat_vis_processor, num_frames=8, 
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
     chat.ask(PROMPT.format(query), state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=3000)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=2048, max_new_tokens=256)[0]
+
+
+def eval_ed(preds, labels):
+    """
+    Damerau–Levenshtein edit distance from: https://github.com/gfairchild/pyxDamerauLevenshtein.
+    For each sample, we take the smallest edit distance among all the K predicted sequences.
+    """
+    N, Z, K = preds.shape
+    dists = []
+    for n in range(N):
+        dist = min([editdistance.eval(preds[n, :, k], labels[n]) / Z for k in range(K)])
+        dists.append(dist)
+    return np.array(dists)
 
 
 if __name__ == "__main__":
     # Example usage
 
-    args = argparse.ArgumentParser(description="Ego4D MQ ICL Demo")
+    args = argparse.ArgumentParser(description="Ego4D MQ FT Demo")
+    args.add_argument("--ann-path", type=str, default="ego4d/annotations/v1/")
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/mq", help="Processed video path to use for the Ego4D dataset.")
@@ -63,7 +79,8 @@ if __name__ == "__main__":
 
     # Action Recognition dataset
     print("Loading MQ dataset...")
-    dset_val = MQDataset(split="val")
+    dset_train = MQDataset(split="train", root=args.ann_path)
+    dset_val = MQDataset(split="val", root=args.ann_path)
 
     print(f"Loaded {len(dset_val)} validation samples.")
 
@@ -81,7 +98,7 @@ if __name__ == "__main__":
         try:
             for segment in video.segments:
                 ssf, sef = segment.video_start_frame, segment.video_end_frame
-                label = segment.label.replace("_/_", "_or_").replace("_", " ")
+                label = segment.label#.replace("_/_", "_or_").replace("_", " ")
 
                 nst, net = (ssf - vsf) / 30.0, (sef - vsf) / 30.0
 
@@ -93,16 +110,19 @@ if __name__ == "__main__":
                     num_frames=args.num_frames,
                     data_path=args.video_path,
                 )
+                
+                print(response)
 
                 best_iou = 0.0
                 for r in response.split(". "):
+                    # print(r)
 
                     match = re.search(r"(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*seconds", r)
                     if match:
                         pred_start = float(match.group(1))
                         pred_end = float(match.group(2))
-
-                        print("Found segment:", pred_start, pred_end)
+                        
+                        print(f"Predicted segment: {pred_start:.2f} - {pred_end:.2f} seconds.")
 
                         inter_start = max(nst, pred_start)
                         inter_end = min(net, pred_end)
