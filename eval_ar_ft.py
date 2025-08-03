@@ -58,7 +58,7 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt, long_context=True)
+    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
 
     # Action Recognition dataset
     print("Loading AR dataset...")
