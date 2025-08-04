@@ -28,7 +28,7 @@ SYSTEM_PROMPT = "You are able to understand the visual content that the user pro
 PROMPT = "Given a short video segment predict the future action as (verb, noun) pairs based on the provided context."
 
 
-def ask(sample, timechat_model, timechat_vis_processor, num_frames=8, data_path: str = "ego4d_hoi_trimmed_videos/lta"):
+def ask(sample, timechat_model, timechat_vis_processor, num_frames=8, data_path: str = "ego4d_hoi_trimmed_videos/lta", context_window: int = 2048):
     """Ask the TimeChat model about LTA samples and return the raw unparsed response of the llm."""
     chat = Chat(timechat_model, timechat_vis_processor, device="cuda")
 
@@ -39,10 +39,9 @@ def ask(sample, timechat_model, timechat_vis_processor, num_frames=8, data_path:
     # Feed the sample and ask the question
     path = osp.join(data_path, sample.clip_uid + ".mp4")
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
-    #chat.ask(PROMPT + "[" + ",".join(f"({verb}, {noun})" for verb, noun in zip(sample.input_verb_labels, sample.input_noun_labels)) + "] => ", state, role="USER")
     chat.ask(PROMPT, state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=0.5, max_length=3000)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=0.5, max_length=context_window, max_new_tokens=256)[0]
 
 
 def eval_ed(preds, labels):
@@ -78,7 +77,7 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
+    model, vis_processor, context_window = build_model(ckpt=args.timechat_ckpt)
 
     # Action Recognition dataset
     print("Loading AR dataset...")

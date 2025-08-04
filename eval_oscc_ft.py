@@ -18,7 +18,7 @@ SYSTEM_PROMPT = "You are able to understand the visual content that the user pro
 PROMPT = "Tell if the given video contains an object state change and output either 'yes' or 'no'. "
 
 
-def ask(video_uid: str, timechat_model, vis_processor, n_frames: int = 8, data_path: str = "ego4d_hoi_trimmed_videos/oscc"):
+def ask(video_uid: str, timechat_model, vis_processor, n_frames: int = 8, data_path: str = "ego4d_hoi_trimmed_videos/oscc", context_window: int = 2048):
     """Ask the TimeChat model about OSCC samples and return the raw unparsed response of the llm."""
     chat = Chat(timechat_model, vis_processor, device="cuda")
 
@@ -32,7 +32,7 @@ def ask(video_uid: str, timechat_model, vis_processor, n_frames: int = 8, data_p
     chat.ask(PROMPT, state, role="USER")
 
     # Return the response of the LLM
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=3000)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=context_window, max_new_tokens=256)[0]
 
 
 if __name__ == "__main__":
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
+    model, vis_processor, context_window = build_model(ckpt=args.timechat_ckpt)
 
     # Object State Change Classification (OSCC) dataset
     print("Loading OSCC dataset...")

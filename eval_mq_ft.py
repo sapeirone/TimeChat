@@ -26,7 +26,7 @@ SYSTEM_PROMPT = "You are able to understand the visual content that the user pro
 PROMPT = "Find all the segments that corresponds to the textual query '{}' and determine their start and end seconds."
 
 
-def ask(video_uid, query, timechat_model, timechat_vis_processor, num_frames=8, data_path: str = "ego4d_hoi_trimmed_videos/ar"):
+def ask(video_uid, query, timechat_model, timechat_vis_processor, num_frames=8, data_path: str = "ego4d_hoi_trimmed_videos/ar", context_window: int = 2048):
     """Ask the TimeChat model about MQ samples and return the raw unparsed response of the llm."""
     chat = Chat(timechat_model, timechat_vis_processor, device="cuda")
 
@@ -39,7 +39,7 @@ def ask(video_uid, query, timechat_model, timechat_vis_processor, num_frames=8, 
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
     chat.ask(PROMPT.format(query), state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=2048, max_new_tokens=256)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=context_window, max_new_tokens=256)[0]
 
 
 def eval_ed(preds, labels):
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
+    model, vis_processor, context_window = build_model(ckpt=args.timechat_ckpt)
 
     # Action Recognition dataset
     print("Loading MQ dataset...")
@@ -110,8 +110,6 @@ if __name__ == "__main__":
                     num_frames=args.num_frames,
                     data_path=args.video_path,
                 )
-                
-                print(response)
 
                 best_iou = 0.0
                 for r in response.split(". "):

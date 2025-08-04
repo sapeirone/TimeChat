@@ -31,7 +31,7 @@ EXAMPLES_PROMPT = "Look at the following examples: "
 PROMPT = "Describe the action shown in the video with a (verb, noun) pair: "
 
 
-def ask(video_uid, timechat_model, timechat_vis_processor, verbs_list, nouns_list, num_frames=8, n_icl: int = 0, icl_clips = [], data_path: str = "ego4d_hoi_trimmed_videos/ar"):
+def ask(video_uid, timechat_model, timechat_vis_processor, verbs_list, nouns_list, num_frames=8, n_icl: int = 0, icl_clips = [], data_path: str = "ego4d_hoi_trimmed_videos/ar", context_window: int = 2048):
     """Ask the TimeChat model about AR samples and return the raw unparsed response of the llm."""
     chat = Chat(timechat_model, timechat_vis_processor, device="cuda")
 
@@ -58,7 +58,7 @@ def ask(video_uid, timechat_model, timechat_vis_processor, verbs_list, nouns_lis
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
     chat.ask(PROMPT, state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=4096, max_new_tokens=256)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=context_window, max_new_tokens=256)[0]
 
 
 if __name__ == "__main__":
@@ -69,6 +69,7 @@ if __name__ == "__main__":
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--icl-examples", type=int, default=0, help="Number of in-context learning examples to use (0 means no ICL samples).")
+    args.add_argument("--long-context", action="store_true", help="Use long context for the model.")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/ar", help="Processed video path to use for the Ego4D dataset.")
 
     args = args.parse_args()
@@ -78,11 +79,12 @@ if __name__ == "__main__":
     print(f"Using {args.num_frames} frames and {args.icl_examples} ICL examples.")
     print(f"Video path: {args.video_path}")
     print(f"TimeChat ckpt: {args.timechat_ckpt}")
+    print(f"Long context: {args.long_context}")
     print("###########################")
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt, long_context=True)
+    model, vis_processor, context_window = build_model(ckpt=args.timechat_ckpt, long_context=args.long_context)
 
     # Action Recognition dataset
     print("Loading AR dataset...")
@@ -121,6 +123,9 @@ if __name__ == "__main__":
                     verb = token.lemma_
                 if token.pos_ == "NOUN" and noun is None and token.text in dset_val.noun_labels:
                     noun = token.text
+                    
+                if verb is not None and noun is not None:
+                    break
                     
             verbs_correct.append(verb is not None and verb.lower() == sample.verb)
             nouns_correct.append(noun is not None and noun.lower() == sample.noun)

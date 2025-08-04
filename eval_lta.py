@@ -36,7 +36,7 @@ EXAMPLES_PROMPT = "Look at the following examples: "
 PROMPT = "The most likely 20 future actions are: "
 
 
-def ask(sample, timechat_model, timechat_vis_processor, verbs_list, nouns_list, num_frames=8, n_icl: int = 0, icl_clips=[], data_path: str = "ego4d_hoi_trimmed_videos/lta"):
+def ask(sample, timechat_model, timechat_vis_processor, verbs_list, nouns_list, num_frames=8, n_icl: int = 0, icl_clips=[], data_path: str = "ego4d_hoi_trimmed_videos/lta", context_window: int = 2048):
     """Ask the TimeChat model about LTA samples and return the raw unparsed response of the llm."""
     chat = Chat(timechat_model, timechat_vis_processor, device="cuda")
 
@@ -61,10 +61,9 @@ def ask(sample, timechat_model, timechat_vis_processor, verbs_list, nouns_list, 
     # Feed the sample and ask the question
     path = osp.join(data_path, sample.clip_uid + ".mp4")
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
-    #chat.ask(PROMPT + "[" + ",".join(f"({verb}, {noun})" for verb, noun in zip(sample.input_verb_labels, sample.input_noun_labels)) + "] => ", state, role="USER")
     chat.ask(PROMPT, state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=0.5, max_length=4096, max_new_tokens=512)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=0.5, max_length=context_window, max_new_tokens=256)[0]
 
 
 def eval_ed(preds, labels):
@@ -88,6 +87,7 @@ if __name__ == "__main__":
     args.add_argument("--timechat-ckpt", type=str, default="ckpt/timechat/timechat_7b.pth")
     args.add_argument("--num-frames", type=int, default=8, help="Number of frames to sample from the video.")
     args.add_argument("--icl-examples", type=int, default=0, help="Number of in-context learning examples to use (0 means no ICL samples).")
+    args.add_argument("--long-context", action="store_true", help="Use long context for the model.")
     args.add_argument("--video-path", type=str, default="ego4d_hoi_trimmed_videos/lta", help="Processed video path to use for the Ego4D dataset.")
 
     args = args.parse_args()
@@ -97,14 +97,15 @@ if __name__ == "__main__":
     print(f"Using {args.num_frames} frames and {args.icl_examples} ICL examples.")
     print(f"Video path: {args.video_path}")
     print(f"TimeChat ckpt: {args.timechat_ckpt}")
+    print(f"Long context: {args.long_context}")
     print("###########################")
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt, long_context=True)
+    model, vis_processor, context_window = build_model(ckpt=args.timechat_ckpt, long_context=args.long_context)
 
-    # Action Recognition dataset
-    print("Loading AR dataset...")
+    # Long Term Anticipation dataset
+    print("Loading LTA dataset...")
     dset_train = LTADataset(split="train", root=args.ann_path)
     dset_val = LTADataset(split="val", root=args.ann_path)
 

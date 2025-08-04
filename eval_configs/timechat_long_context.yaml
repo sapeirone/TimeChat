@@ -3,7 +3,7 @@ model:
   model_type: pretrain_llama_v2
   freeze_vit: True
   freeze_qformer: True
-  max_txt_len: 4096
+  max_txt_len: 8192
   end_sym: "</s>"
   low_resource: False
 

@@ -22,7 +22,7 @@ SYSTEM_PROMPT = "You are able to understand the visual content that the user pro
 PROMPT = "Describe the action shown in the video with a (verb, noun) pair."
 
 
-def ask(video_uid, timechat_model, timechat_vis_processor, num_frames=8, data_path: str = "ego4d_hoi_trimmed_videos/ar"):
+def ask(video_uid, timechat_model, timechat_vis_processor, num_frames=8, data_path: str = "ego4d_hoi_trimmed_videos/ar", context_window: int = 2048):
     """Ask the TimeChat model about AR samples and return the raw unparsed response of the llm."""
     chat = Chat(timechat_model, timechat_vis_processor, device="cuda")
 
@@ -35,7 +35,7 @@ def ask(video_uid, timechat_model, timechat_vis_processor, num_frames=8, data_pa
     chat.upload_video_without_audio(video_path=path, conv=state, img_list=frames, n_frms=num_frames)
     chat.ask(PROMPT, state, role="USER")
 
-    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=3000)[0]
+    return chat.answer(conv=state, img_list=frames, num_beams=1, temperature=1.0, max_length=context_window, max_new_tokens=256)[0]
 
 
 if __name__ == "__main__":
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     print("\n")
 
     # Build the TimeChat model
-    model, vis_processor = build_model(ckpt=args.timechat_ckpt)
+    model, vis_processor, context_window = build_model(ckpt=args.timechat_ckpt)
 
     # Action Recognition dataset
     print("Loading AR dataset...")
@@ -86,14 +86,15 @@ if __name__ == "__main__":
                 data_path=args.video_path,
             )
 
-            print(response)
-
             verb, noun = None, None
             for token in nlp(response):
                 if token.pos_ == "VERB" and verb is None and token.lemma_ in dset_val.verb_labels:
                     verb = token.lemma_
                 if token.pos_ == "NOUN" and noun is None and token.text in dset_val.noun_labels:
                     noun = token.text
+                    
+                if verb is not None and noun is not None:
+                    break
                     
             verbs_correct.append(verb is not None and verb.lower() == sample.verb)
             nouns_correct.append(noun is not None and noun.lower() == sample.noun)
