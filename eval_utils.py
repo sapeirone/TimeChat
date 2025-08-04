@@ -67,7 +67,7 @@ def build_model(ckpt="ckpt/timechat/timechat_7b.pth", long_context=False):
     vis_proc_cfg = cfg.datasets_cfg.webvid.vis_processor.train
     vis_proc = registry.get_processor_class(vis_proc_cfg.name).from_config(vis_proc_cfg)
 
-    return model, vis_proc
+    return model, vis_proc, cfg.model_cfg['max_txt_len']
 
 
 def save_frames_from_list(
