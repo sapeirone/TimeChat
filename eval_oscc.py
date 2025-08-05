@@ -130,6 +130,7 @@ if __name__ == "__main__":
                 n_frames=args.num_frames,
                 n_icl=args.icl_examples,
                 data_path=args.video_path,
+                context_window=context_window
             )
 
             # Parse the response in a quite permissive way

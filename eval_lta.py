@@ -131,6 +131,7 @@ if __name__ == "__main__":
                 n_icl=args.icl_examples,
                 data_path=args.video_path,
                 icl_clips=list(dset_train),
+                context_window=context_window
             )
 
             # try to separate the response into a list of pairs

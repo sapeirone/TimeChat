@@ -120,6 +120,7 @@ if __name__ == "__main__":
                 n_frames=args.num_frames,
                 n_icl=args.icl_examples,
                 data_path=args.video_path,
+                context_window=context_window
             )
 
             # Extract the float number corresponding to the PNR timestamp from the LLM answer

@@ -114,7 +114,8 @@ if __name__ == "__main__":
                 nouns_list=dset_val.noun_labels,
                 data_path=args.video_path,
                 n_icl=args.icl_examples,
-                icl_clips=list(dset_train)
+                icl_clips=list(dset_train),
+                context_window=context_window
             )
 
             verb, noun = None, None
